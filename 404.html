@@ -58,8 +58,8 @@ footer b{color:#e50914}
 
 <div class="bar">
   <label><input type="checkbox" id="optAuto" checked /> Auto-Encrypt on paste/type</label>
-  <label>Layers: <input type="number" id="optLayers" value="3" min="1" max="6" /></label>
-  <label><input type="checkbox" id="optAntiDebug" checked /> Anti-DevTools</label>
+  <label>Layers: <input type="number" id="optLayers" value="2" min="1" max="6" /></label>
+  <label><input type="checkbox" id="optAntiDebug" /> Anti-DevTools <span style="color:#888;font-size:10px">(may break on mobile)</span></label>
   <label><input type="checkbox" id="optBlockClick" checked /> Block Right-Click</label>
   <span class="spacer"></span>
   <span class="status">Status: <b id="status">Ready</b></span>
@@ -158,10 +158,11 @@ footer b{color:#e50914}
         "document.addEventListener('keydown',function(e){var k=(e.key||'').toLowerCase();if(e.ctrlKey&&['u','s','p','a','c'].indexOf(k)>-1){e.preventDefault();return false;}if(e.keyCode===123){e.preventDefault();return false;}if(e.ctrlKey&&e.shiftKey&&['i','j','c','k'].indexOf(k)>-1){e.preventDefault();return false;}});";
     }
     if(antiDebug){
+      // Conservative anti-debug: only debugger trap (no window-size detection, which false-positives on mobile/extensions).
+      // Wait 4 seconds before activating so initial render completes safely.
       protJs +=
-        "(function(){var blocked=false;function block(){if(blocked)return;blocked=true;document.documentElement.innerHTML='<div style=\"font-family:Arial;text-align:center;padding:80px 20px;color:#e50914;background:#0a0a0a;min-height:100vh\"><h1 style=\"font-size:48px;margin:0 0 20px\">⚠ Access Denied</h1><p style=\"color:#888;font-size:16px\">DevTools detected. Reload to continue.</p><p style=\"color:#555;font-size:12px;margin-top:30px\">Protected by RAJAMODS7</p></div>';}" +
-        "setInterval(function(){var s=performance.now();debugger;if(performance.now()-s>120)block();},1000);" +
-        "var threshold=160;setInterval(function(){if(window.outerWidth-window.innerWidth>threshold||window.outerHeight-window.innerHeight>threshold)block();},1000);" +
+        "(function(){var blocked=false;function block(){if(blocked)return;blocked=true;document.documentElement.innerHTML='<div style=\"font-family:Arial;text-align:center;padding:80px 20px;color:#e50914;background:#0a0a0a;min-height:100vh\"><h1 style=\"font-size:48px;margin:0 0 20px\">⚠ Access Denied</h1><p style=\"color:#888;font-size:16px\">DevTools detected. Close DevTools and reload.</p><p style=\"color:#555;font-size:12px;margin-top:30px\">Protected by RAJAMODS7</p></div>';}" +
+        "setTimeout(function(){setInterval(function(){var s=Date.now();(function(){}).constructor('debugger')();if(Date.now()-s>200)block();},2000);},4000);" +
         "})();";
     }
     var wrapper = '<!DOCTYPE html>\n<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Protected</title>' +
