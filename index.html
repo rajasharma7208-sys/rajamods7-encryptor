@@ -2,365 +2,334 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>RAJAMODS7 — HTML Encryptor</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>RAJAMODS7 HTML Encryptor — Paste & Auto Encrypt</title>
+<meta name="description" content="Paste your HTML and get instantly encrypted, view-source-proof code. RAJAMODS7." />
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{
-    font-family:'Inter',system-ui,sans-serif;
-    background:#0a0a0a;color:#e5e5e5;min-height:100vh;
-    background-image:radial-gradient(circle at 20% 0%,rgba(229,9,20,.18) 0%,transparent 45%),radial-gradient(circle at 80% 100%,rgba(229,9,20,.10) 0%,transparent 50%);
-  }
-  .wrap{max-width:1100px;margin:0 auto;padding:32px 20px 80px}
-  header{margin-bottom:28px}
-  .brand{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
-  .logo{font-weight:800;font-size:32px;letter-spacing:1px;color:#e50914;text-shadow:0 0 18px rgba(229,9,20,.55)}
-  .tag{font-size:11px;color:#8a8a8a;letter-spacing:3px;text-transform:uppercase}
-  h1{font-size:34px;margin-top:18px;font-weight:700;line-height:1.15}
-  h1 span{color:#e50914}
-  p.lead{margin-top:10px;color:#aaa;font-size:15px;max-width:720px;line-height:1.55}
-
-  .levels{display:flex;gap:8px;margin-top:22px;flex-wrap:wrap}
-  .level{
-    background:#141414;border:1px solid #232323;color:#aaa;padding:10px 18px;border-radius:8px;
-    cursor:pointer;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;
-    transition:all .2s;display:flex;align-items:center;gap:8px;
-  }
-  .level:hover{border-color:#444;color:#e5e5e5}
-  .level.active{background:rgba(229,9,20,.12);border-color:#e50914;color:#fff}
-  .level .dot{width:8px;height:8px;border-radius:50%;background:#444}
-  .level.active .dot{background:#e50914;box-shadow:0 0 8px #e50914}
-  .level .num{background:#1f1f1f;color:#888;padding:1px 7px;border-radius:4px;font-size:10px}
-  .level.active .num{background:#e50914;color:#fff}
-
-  .options{margin-top:18px;display:flex;gap:18px;flex-wrap:wrap;align-items:center}
-  .check{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#aaa;user-select:none}
-  .check input{accent-color:#e50914;width:16px;height:16px;cursor:pointer}
-  .check:hover{color:#e5e5e5}
-
-  .grid{display:grid;grid-template-columns:1fr;gap:24px;margin-top:28px}
-  @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
-  .panel{background:#141414;border:1px solid #232323;border-radius:14px;padding:18px;display:flex;flex-direction:column}
-  .panel h3{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
-  .panel h3 .badge{background:#1f1f1f;color:#e50914;padding:3px 9px;border-radius:999px;font-size:10px;letter-spacing:1px}
-  textarea{
-    width:100%;min-height:340px;flex:1;background:#0a0a0a;color:#e5e5e5;
-    border:1px solid #2a2a2a;border-radius:10px;padding:14px;
-    font-family:'JetBrains Mono','Courier New',monospace;font-size:13px;line-height:1.55;
-    resize:vertical;outline:none;transition:border .2s;
-  }
-  textarea:focus{border-color:#e50914;box-shadow:0 0 0 3px rgba(229,9,20,.15)}
-  .actions{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap;justify-content:center}
-  .btn{
-    background:#e50914;color:#fff;border:none;padding:14px 28px;border-radius:8px;
-    font-weight:700;font-size:14px;letter-spacing:1px;text-transform:uppercase;
-    cursor:pointer;transition:all .2s;
-  }
-  .btn:hover{background:#ff0a1a;transform:translateY(-1px);box-shadow:0 6px 22px rgba(229,9,20,.4)}
-  .btn:active{transform:translateY(0)}
-  .btn.secondary{background:#1f1f1f;color:#e5e5e5;border:1px solid #333}
-  .btn.secondary:hover{background:#2a2a2a;box-shadow:none}
-  .btn.copy{background:#1f1f1f;color:#e50914;border:1px solid #2a2a2a;padding:6px 14px;font-size:11px;letter-spacing:1px}
-  .btn.copy:hover{background:#2a2a2a;box-shadow:none;transform:none}
-  .stats{display:flex;gap:18px;margin-top:14px;font-size:12px;color:#777;flex-wrap:wrap}
-  .stats span b{color:#e5e5e5;font-weight:600}
-  footer{text-align:center;margin-top:50px;color:#555;font-size:12px;letter-spacing:1px}
-  footer b{color:#e50914}
-  .toast{
-    position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);
-    background:#141414;border:1px solid #e50914;color:#e5e5e5;padding:12px 24px;border-radius:8px;
-    font-size:13px;font-weight:500;opacity:0;transition:all .3s;pointer-events:none;z-index:99;
-  }
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0a0a0a;color:#eaeaea;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,sans-serif;min-height:100%}
+body{padding:24px;display:flex;flex-direction:column;align-items:center}
+header{width:100%;max-width:1100px;text-align:center;margin-bottom:18px}
+h1{font-size:30px;background:linear-gradient(135deg,#e50914,#ff6b35,#ffd700);-webkit-background-clip:text;background-clip:text;color:transparent;letter-spacing:.5px}
+.tag{color:#999;font-size:13px;margin-top:6px}
+.wrap{width:100%;max-width:1100px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;background:#141414;border:1px solid #222;border-radius:10px;padding:12px;margin-bottom:14px}
+.bar label{display:flex;align-items:center;gap:6px;color:#ccc;font-size:13px;cursor:pointer}
+.bar input[type=number],.bar select{background:#1f1f1f;color:#fff;border:1px solid #333;border-radius:6px;padding:6px 10px;font-size:13px}
+.bar input[type=checkbox]{accent-color:#e50914;width:16px;height:16px}
+.spacer{flex:1}
+.status{font-size:12px;color:#888}
+.status b{color:#ffd700}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.panel{background:#141414;border:1px solid #222;border-radius:10px;padding:14px;display:flex;flex-direction:column;min-height:420px}
+.panel h3{font-size:14px;color:#ddd;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.badge{font-size:10px;background:#e50914;color:#fff;padding:3px 8px;border-radius:99px;letter-spacing:.5px;font-weight:700}
+.badge.green{background:#10b981}
+textarea{flex:1;width:100%;background:#0a0a0a;color:#0bd47e;border:1px solid #2a2a2a;border-radius:8px;padding:12px;font-family:"SF Mono","Monaco","Cascadia Code",Consolas,monospace;font-size:12px;resize:vertical;min-height:340px;line-height:1.5}
+textarea:focus{outline:none;border-color:#e50914;box-shadow:0 0 0 2px rgba(229,9,20,.2)}
+.actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;justify-content:center}
+.btn{background:linear-gradient(135deg,#e50914,#b00710);color:#fff;border:none;padding:11px 22px;border-radius:8px;font-weight:700;cursor:pointer;font-size:13px;letter-spacing:.5px;transition:all .15s}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(229,9,20,.4)}
+.btn.alt{background:linear-gradient(135deg,#1f1f1f,#2a2a2a);border:1px solid #333}
+.btn.alt:hover{box-shadow:0 4px 14px rgba(255,255,255,.08)}
+.btn.green{background:linear-gradient(135deg,#10b981,#059669)}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(80px);background:#10b981;color:#fff;padding:12px 24px;border-radius:8px;font-weight:600;font-size:13px;opacity:0;transition:all .3s;pointer-events:none;z-index:9999;box-shadow:0 4px 20px rgba(16,185,129,.4)}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.err{background:#e50914;box-shadow:0 4px 20px rgba(229,9,20,.4)}
+footer{margin-top:24px;color:#555;font-size:12px;text-align:center}
+footer b{color:#e50914}
+.stats{display:flex;justify-content:space-between;font-size:11px;color:#777;margin-top:8px;padding:0 4px}
+.stats b{color:#fff}
+.copybar{position:absolute;top:14px;right:14px}
+.panel{position:relative}
+.mini{font-size:11px;padding:6px 12px}
+.tip{font-size:11px;color:#777;margin-top:6px;padding:0 4px}
 </style>
 </head>
 <body>
+
+<header>
+  <h1>🔐 RAJAMODS7 HTML ENCRYPTOR</h1>
+  <p class="tag">Paste your HTML — Auto-Encrypts Instantly. View-Source proof.</p>
+</header>
+
 <div class="wrap">
-  <header>
-    <div class="brand">
-      <div class="logo">RAJAMODS7</div>
-      <div class="tag">HTML Encryptor — Pro</div>
-    </div>
-    <h1>HTML <span>Encrypt</span> Karo Strong Mode Me</h1>
-    <p class="lead">Apna HTML paste karo, level select karo, "Encrypt" dabao. Heavy mode me XOR + Base64 + obfuscated variables + anti-DevTools sab laga hua hai — easily decrypt nahi hota.</p>
 
-    <div class="levels" id="levels">
-      <div class="level" data-level="1"><span class="dot"></span><span class="num">L1</span> Light</div>
-      <div class="level" data-level="2"><span class="dot"></span><span class="num">L2</span> Medium</div>
-      <div class="level active" data-level="3"><span class="dot"></span><span class="num">L3</span> Heavy</div>
-      <div class="level" data-level="4"><span class="dot"></span><span class="num">L4</span> Ultra</div>
-      <div class="level" data-level="5"><span class="dot"></span><span class="num">L5</span> Nested Mega</div>
-    </div>
+<div class="bar">
+  <label><input type="checkbox" id="optAuto" checked /> Auto-Encrypt on paste/type</label>
+  <label>Layers: <input type="number" id="optLayers" value="3" min="1" max="6" /></label>
+  <label><input type="checkbox" id="optAntiDebug" checked /> Anti-DevTools</label>
+  <label><input type="checkbox" id="optBlockClick" checked /> Block Right-Click</label>
+  <span class="spacer"></span>
+  <span class="status">Status: <b id="status">Ready</b></span>
+</div>
 
-    <div class="options">
-      <label class="check"><input type="checkbox" id="optAntiDebug" checked /> Anti-DevTools (F12, right-click block)</label>
-      <label class="check"><input type="checkbox" id="optMinify" checked /> Minify wrapper</label>
-      <label class="check" style="margin-left:auto">Nested Layers: <input type="number" id="optLayers" value="3" min="1" max="6" style="width:50px;background:#1f1f1f;color:#fff;border:1px solid #333;border-radius:4px;padding:4px 8px;margin-left:6px" /></label>
-    </div>
-  </header>
-
-  <div class="grid">
-    <div class="panel">
-      <h3>Input HTML <span class="badge">PASTE HERE</span></h3>
-      <textarea id="input" placeholder="<!DOCTYPE html>&#10;<html>&#10;  <body>&#10;    <h1>Hello World</h1>&#10;  </body>&#10;</html>"></textarea>
-      <div class="stats"><span>Length: <b id="inLen">0</b></span></div>
-    </div>
-
-    <div class="panel">
-      <h3>Encrypted Output <button class="btn copy" id="copyBtn" type="button">COPY</button></h3>
-      <textarea id="output" placeholder="Encrypted code will appear here..." readonly></textarea>
-      <div class="stats"><span>Length: <b id="outLen">0</b></span><span>Ratio: <b id="ratio">—</b></span><span>Mode: <b id="modeLabel">Heavy</b></span></div>
-    </div>
+<div class="grid">
+  <div class="panel">
+    <h3>📥 INPUT HTML <span class="badge">PASTE HERE</span></h3>
+    <textarea id="input" spellcheck="false" placeholder="<!DOCTYPE html>&#10;<html>&#10;<body>&#10;  <h1>Your HTML</h1>&#10;</body>&#10;</html>&#10;&#10;Paste karo — instant encrypt ho jayega 🔥"></textarea>
+    <div class="stats"><span>Length: <b id="inLen">0</b> chars</span><span>Lines: <b id="inLine">0</b></span></div>
   </div>
 
-  <div class="actions">
-    <button class="btn" id="encryptBtn" type="button">Encrypt</button>
-    <button class="btn secondary" id="decryptBtn" type="button">Decrypt (L1/L2)</button>
-    <button class="btn secondary" id="clearBtn" type="button">Clear</button>
-    <button class="btn secondary" id="downloadBtn" type="button">Download .html</button>
+  <div class="panel">
+    <h3>🔒 ENCRYPTED OUTPUT <span class="badge green" id="readyBadge">READY</span></h3>
+    <textarea id="output" readonly placeholder="Encrypted code yahan auto aa jayega..."></textarea>
+    <div class="stats"><span>Length: <b id="outLen">0</b> chars</span><span>Growth: <b id="ratio">—</b></span></div>
   </div>
+</div>
 
-  <footer>
-    BUILT WITH <b>♥</b> BY <b>RAJAMODS7</b>
-  </footer>
+<div class="actions">
+  <button class="btn" id="encryptBtn">🔐 ENCRYPT NOW</button>
+  <button class="btn green" id="copyBtn">📋 COPY OUTPUT</button>
+  <button class="btn green" id="downloadBtn">⬇️ DOWNLOAD .HTML</button>
+  <button class="btn alt" id="previewBtn">👁️ PREVIEW</button>
+  <button class="btn alt" id="clearBtn">🗑️ CLEAR</button>
+  <button class="btn alt" id="sampleBtn">📝 LOAD SAMPLE</button>
+</div>
+
+<p class="tip">💡 Tip: <b>Auto-Encrypt</b> ON hai — paste karte hi convert ho jayega. Layers badhao to file zyada bhaari aur unrecoverable hogi.</p>
+
+<footer>
+  BUILT WITH <b>♥</b> BY <b>RAJAMODS7</b> · 100% client-side · No data uploaded
+</footer>
+
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
 (function(){
-  var input=document.getElementById('input');
-  var output=document.getElementById('output');
-  var inLen=document.getElementById('inLen');
-  var outLen=document.getElementById('outLen');
-  var ratio=document.getElementById('ratio');
-  var modeLabel=document.getElementById('modeLabel');
-  var toast=document.getElementById('toast');
-  var optAntiDebug=document.getElementById('optAntiDebug');
-  var optMinify=document.getElementById('optMinify');
-  var optLayers=document.getElementById('optLayers');
-  var levelsBox=document.getElementById('levels');
-  var currentLevel=3;
+  var input  = document.getElementById('input');
+  var output = document.getElementById('output');
+  var inLen  = document.getElementById('inLen');
+  var inLine = document.getElementById('inLine');
+  var outLen = document.getElementById('outLen');
+  var ratio  = document.getElementById('ratio');
+  var status = document.getElementById('status');
+  var toast  = document.getElementById('toast');
+  var optAuto      = document.getElementById('optAuto');
+  var optLayers    = document.getElementById('optLayers');
+  var optAntiDebug = document.getElementById('optAntiDebug');
+  var optBlockClick= document.getElementById('optBlockClick');
+
+  var debounceTimer;
   var toastTimer;
 
-  function showToast(msg){
-    toast.textContent=msg;toast.classList.add('show');
+  function showToast(msg, isErr){
+    toast.textContent = msg;
+    toast.classList.toggle('err', !!isErr);
+    toast.classList.add('show');
     clearTimeout(toastTimer);
-    toastTimer=setTimeout(function(){toast.classList.remove('show');},2200);
+    toastTimer = setTimeout(function(){ toast.classList.remove('show'); }, 2200);
   }
 
-  function updateStats(){
-    inLen.textContent=input.value.length.toLocaleString();
-    outLen.textContent=output.value.length.toLocaleString();
-    if(input.value.length>0 && output.value.length>0){
-      var pct=Math.round((output.value.length/input.value.length)*100);
-      ratio.textContent=pct+'%';
-    } else { ratio.textContent='—'; }
+  function setStatus(s, color){
+    status.textContent = s;
+    status.style.color = color || '#ffd700';
   }
 
-  function rndVar(){return '_0x'+Math.random().toString(16).slice(2,8);}
-  function rnd(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
-
-  function utf8ToStr(s){return unescape(encodeURIComponent(s));}
-  function strToUtf8(s){return decodeURIComponent(escape(s));}
-
-  function antiDebugCode(){
-    return "document.addEventListener('contextmenu',function(e){e.preventDefault();});"+
-      "document.addEventListener('keydown',function(e){var k=e.keyCode||e.which;if(k==123||(e.ctrlKey&&e.shiftKey&&(k==73||k==74||k==67))||(e.ctrlKey&&k==85))e.preventDefault();});"+
-      "(function(){var t=function(){var s=new Date();debugger;if(new Date()-s>100){document.body.innerHTML='<div style=\"font-family:sans-serif;text-align:center;padding:60px;color:#e50914\"><h1>Access Denied</h1><p>DevTools detected. Reload to continue.</p></div>';}};setInterval(t,1500);})();";
+  function updateInputStats(){
+    var v = input.value;
+    inLen.textContent  = v.length.toLocaleString();
+    inLine.textContent = v ? v.split('\n').length.toLocaleString() : '0';
   }
 
-  // Level 1 — escape / unescape (basic)
-  function encryptL1(html,withAntiDebug){
-    var s='<noscript>You must enable javascript in your browser to view this webpage.</noscript>\n<!DOCTYPE html>\n<script type="text/javascript">document.write(unescape("'+escape(html)+'"));';
-    if(withAntiDebug) s+=antiDebugCode();
-    s+='</scr'+'ipt>';
-    return s;
+  function updateOutputStats(){
+    var iv = input.value, ov = output.value;
+    outLen.textContent = ov.length.toLocaleString();
+    if(iv.length > 0 && ov.length > 0){
+      var pct = Math.round((ov.length / iv.length) * 100);
+      ratio.textContent = pct + '% (' + (pct/100).toFixed(1) + 'x)';
+    } else { ratio.textContent = '—'; }
   }
 
-  // Level 2 — Base64 + eval
-  function encryptL2(html,withAntiDebug,minify){
-    var b64=btoa(utf8ToStr(html));
-    var v1=rndVar(),v2=rndVar();
-    var body='var '+v1+'="'+b64+'";var '+v2+'=decodeURIComponent(escape(atob('+v1+')));document.write('+v2+');';
-    if(withAntiDebug) body+=antiDebugCode();
-    var s='<noscript>You must enable javascript in your browser to view this webpage.</noscript>\n<!DOCTYPE html>\n<script type="text/javascript">'+(minify?'(function(){'+body+'})();':'\n(function(){\n'+body+'\n})();\n')+'</scr'+'ipt>';
-    return s;
-  }
-
-  // Level 3 — XOR + Base64 + obfuscated variables (Heavy)
-  function encryptL3(html,withAntiDebug,minify){
-    var keyLen=32;
-    var key=[];for(var i=0;i<keyLen;i++) key.push(rnd(0,255));
-    var raw=utf8ToStr(html);
-    var xored='';
-    for(var j=0;j<raw.length;j++){
-      xored+=String.fromCharCode(raw.charCodeAt(j)^key[j%keyLen]);
+  // ============== Anti-DevTools / Anti-Click protection scaffold ==============
+  function buildProtectionWrapper(innerHTML, antiDebug, blockClick){
+    var encInner = encodeURIComponent(innerHTML).replace(/'/g, '%27');
+    var protJs = '';
+    if(blockClick){
+      protJs +=
+        "document.addEventListener('contextmenu',function(e){e.preventDefault();return false;});" +
+        "document.addEventListener('selectstart',function(e){e.preventDefault();return false;});" +
+        "document.addEventListener('dragstart',function(e){e.preventDefault();return false;});" +
+        "document.addEventListener('copy',function(e){e.preventDefault();return false;});" +
+        "document.body.style.userSelect='none';document.body.style.webkitUserSelect='none';document.body.style.mozUserSelect='none';" +
+        "document.addEventListener('keydown',function(e){var k=(e.key||'').toLowerCase();if(e.ctrlKey&&['u','s','p','a','c'].indexOf(k)>-1){e.preventDefault();return false;}if(e.keyCode===123){e.preventDefault();return false;}if(e.ctrlKey&&e.shiftKey&&['i','j','c','k'].indexOf(k)>-1){e.preventDefault();return false;}});";
     }
-    var b64=btoa(xored);
-    var v1=rndVar(),v2=rndVar(),v3=rndVar(),v4=rndVar(),v5=rndVar();
-    var body='var '+v1+'=['+key.join(',')+'];'+
-      'var '+v2+'="'+b64+'";'+
-      'var '+v3+'=function(s,k){var r="";for(var i=0;i<s.length;i++)r+=String.fromCharCode(s.charCodeAt(i)^k[i%k.length]);return r;};'+
-      'var '+v4+'=atob('+v2+');'+
-      'var '+v5+'=decodeURIComponent(escape('+v3+'('+v4+','+v1+')));'+
-      'document.write('+v5+');';
-    if(withAntiDebug) body+=antiDebugCode();
-    var s='<noscript>You must enable javascript in your browser to view this webpage.</noscript>\n<!DOCTYPE html>\n<script type="text/javascript">'+(minify?'(function(){'+body+'})();':'\n(function(){\n'+body+'\n})();\n')+'</scr'+'ipt>';
-    return s;
+    if(antiDebug){
+      protJs +=
+        "(function(){var blocked=false;function block(){if(blocked)return;blocked=true;document.documentElement.innerHTML='<div style=\"font-family:Arial;text-align:center;padding:80px 20px;color:#e50914;background:#0a0a0a;min-height:100vh\"><h1 style=\"font-size:48px;margin:0 0 20px\">⚠ Access Denied</h1><p style=\"color:#888;font-size:16px\">DevTools detected. Reload to continue.</p><p style=\"color:#555;font-size:12px;margin-top:30px\">Protected by RAJAMODS7</p></div>';}" +
+        "setInterval(function(){var s=performance.now();debugger;if(performance.now()-s>120)block();},1000);" +
+        "var threshold=160;setInterval(function(){if(window.outerWidth-window.innerWidth>threshold||window.outerHeight-window.innerHeight>threshold)block();},1000);" +
+        "})();";
+    }
+    var wrapper = '<!DOCTYPE html>\n<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Protected</title>' +
+      '<style>html,body{margin:0;padding:0;width:100%;min-height:100vh;background:transparent}</style>' +
+      '</head><body><script>' +
+      protJs +
+      "document.write(decodeURIComponent('" + encInner + "'));" +
+      '</scr' + 'ipt></body></html>';
+    return wrapper;
   }
 
-  // Level 4 — XOR + Base64 + char-shift + double layer (Ultra)
-  function encryptL4(html,withAntiDebug,minify){
-    var shift=rnd(3,250);
-    var keyLen=48;
-    var key=[];for(var i=0;i<keyLen;i++) key.push(rnd(0,255));
-    var raw=utf8ToStr(html);
-    var xored='';
-    for(var j=0;j<raw.length;j++){
-      var c=(raw.charCodeAt(j)+shift)&0xff;
-      xored+=String.fromCharCode(c^key[j%keyLen]);
-    }
-    var b64=btoa(xored);
-    // Split base64 into chunks
-    var chunkSize=80;
-    var chunks=[];
-    for(var k=0;k<b64.length;k+=chunkSize) chunks.push('"'+b64.slice(k,k+chunkSize)+'"');
-    var v1=rndVar(),v2=rndVar(),v3=rndVar(),v4=rndVar(),v5=rndVar(),v6=rndVar(),v7=rndVar();
-    var body='var '+v1+'=['+key.join(',')+'];'+
-      'var '+v6+'='+shift+';'+
-      'var '+v2+'=['+chunks.join(',')+'].join("");'+
-      'var '+v3+'=function(s,k,sh){var r="";for(var i=0;i<s.length;i++){var c=s.charCodeAt(i)^k[i%k.length];c=(c-sh+256)&0xff;r+=String.fromCharCode(c);}return r;};'+
-      'var '+v7+'=function(b){return atob(b);};'+
-      'var '+v4+'='+v7+'('+v2+');'+
-      'var '+v5+'=decodeURIComponent(escape('+v3+'('+v4+','+v1+','+v6+')));'+
-      'document.write('+v5+');';
-    if(withAntiDebug) body+=antiDebugCode();
-    var s='<noscript>You must enable javascript in your browser to view this webpage.</noscript>\n<!DOCTYPE html>\n<script type="text/javascript">'+(minify?'(function(){'+body+'})();':'\n(function(){\n'+body+'\n})();\n')+'</scr'+'ipt>';
-    return s;
+  // ============== Core encryption: nested base64 + URI encoding ==============
+  function utf8ToBase64(str){
+    return btoa(unescape(encodeURIComponent(str)));
   }
 
-  // Level 5 — Nested Mega: escape() inner + N base64+URI layers (matches "send.vis.ee style" pattern)
-  function encryptL5(html,withAntiDebug,layers){
-    var inner = html;
-    if(withAntiDebug){
-      // Wrap original HTML in an anti-protection scaffold (iframe + protection script)
-      var encInner = encodeURIComponent(inner).replace(/'/g,'%27');
-      var prot = '<!DOCTYPE html>\n<html>\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>Protected</title>\n<style>html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:transparent;}</style>\n</head>\n<body>\n<script>\n'+
-        "document.addEventListener('contextmenu',e=>e.preventDefault());"+
-        "document.addEventListener('selectstart',e=>e.preventDefault());"+
-        "document.addEventListener('dragstart',e=>e.preventDefault());"+
-        "document.body.style.userSelect='none';document.body.style.webkitUserSelect='none';"+
-        "document.addEventListener('keydown',function(e){var k=(e.key||'').toLowerCase();if(e.ctrlKey&&['u','s','p','i','j','c'].includes(k))e.preventDefault();if(e.keyCode===123)e.preventDefault();if(e.ctrlKey&&e.shiftKey&&['i','j','c'].includes(k))e.preventDefault();});"+
-        "(function(){setInterval(function(){var s=new Date();debugger;if(new Date()-s>100){document.body.innerHTML='<div style=\"font-family:sans-serif;text-align:center;padding:60px;color:#e50914\"><h1>Access Denied</h1></div>';}},1500);})();"+
-        "document.write(decodeURIComponent('"+encInner+"'));"+
-        '\n</script>\n</body>\n</html>';
-      inner = prot;
-    }
-    // Innermost layer: escape (URI-hex) + document.write(decodeURIComponent('...'))
-    var hex = '';
-    for(var i=0;i<inner.length;i++){
-      var c=inner.charCodeAt(i);
-      if(c<128){
-        var h=c.toString(16).toUpperCase();
-        hex += '%'+(h.length<2?'0':'')+h;
+  function escapeHex(str){
+    var out = '';
+    for(var i=0;i<str.length;i++){
+      var c = str.charCodeAt(i);
+      if(c < 128){
+        var h = c.toString(16).toUpperCase();
+        out += '%' + (h.length < 2 ? '0' : '') + h;
+      } else if(c < 256){
+        out += '%' + c.toString(16).toUpperCase();
       } else {
-        hex += encodeURIComponent(inner.charAt(i)).replace(/%/g,'%').toUpperCase();
+        // Multi-byte UTF-16
+        out += '%u' + ('0000' + c.toString(16).toUpperCase()).slice(-4);
       }
     }
-    var current = '<!DOCTYPE html>\n<script>document.write(decodeURIComponent(\''+hex+'\'))</script>';
-    // Outer layers: base64 + URI escape, wrap in document.write(decodeURIComponent(atob('...')))
-    var n = Math.max(1, Math.min(6, layers||3));
-    for(var L=0; L<n; L++){
-      var b64 = btoa(unescape(encodeURIComponent(current)));
-      // Re-encode to URI escape after base64 (matches the pattern: layer's atob output is the next layer string)
-      current = '<!DOCTYPE html>\n<script type="text/javascript">document.write(decodeURIComponent(atob(\''+b64+'\')))</script>';
+    return out;
+  }
+
+  function encryptHTML(html, layers, antiDebug, blockClick){
+    // Step 1: wrap with protection scaffold (if requested)
+    var inner = (antiDebug || blockClick)
+      ? buildProtectionWrapper(html, antiDebug, blockClick)
+      : html;
+
+    // Step 2: innermost = unescape() based hex layer (matches send.vis.ee inner)
+    var hex = escapeHex(inner);
+    var current = '<!DOCTYPE html>\n<script type="text/javascript">document.write(unescape("' + hex + '"));</scr' + 'ipt>';
+
+    // Step 3: outer N layers of base64 + decodeURIComponent + atob
+    layers = Math.max(1, Math.min(6, parseInt(layers,10) || 3));
+    for(var i=0; i<layers; i++){
+      var b64 = utf8ToBase64(current);
+      current = '<!DOCTYPE html>\n<script type="text/javascript">document.write(decodeURIComponent(atob("' + b64 + '")));</scr' + 'ipt>';
     }
     return current;
   }
 
-  function encrypt(html){
-    var ad=optAntiDebug.checked;
-    var mn=optMinify.checked;
-    var lyr=parseInt(optLayers.value,10)||3;
-    if(currentLevel===1) return encryptL1(html,ad);
-    if(currentLevel===2) return encryptL2(html,ad,mn);
-    if(currentLevel===3) return encryptL3(html,ad,mn);
-    if(currentLevel===4) return encryptL4(html,ad,mn);
-    if(currentLevel===5) return encryptL5(html,ad,lyr);
-    return encryptL3(html,ad,mn);
-  }
-
-  function decrypt(enc){
-    // Try L1 first
-    var m=enc.match(/document\.write\(unescape\("([\s\S]*?)"\)\)/);
-    if(m){ try{ return unescape(m[1]); }catch(e){} }
-    // Try L2 (base64 + atob)
-    var m2=enc.match(/atob\(\s*"([A-Za-z0-9+/=]+)"\s*\)/);
-    if(!m2){
-      var m2b=enc.match(/var\s+(\w+)\s*=\s*"([A-Za-z0-9+/=]+)";\s*var\s+\w+\s*=\s*decodeURIComponent\(escape\(atob\(\1\)\)\)/);
-      if(m2b) m2=[null,m2b[2]];
+  function doEncrypt(){
+    var v = input.value;
+    if(!v.trim()){
+      output.value = '';
+      updateOutputStats();
+      setStatus('Empty', '#888');
+      return;
     }
-    if(m2){ try{ return decodeURIComponent(escape(atob(m2[1]))); }catch(e){} }
-    return null;
+    setStatus('Encrypting...', '#ffd700');
+    try{
+      var t0 = performance.now();
+      var enc = encryptHTML(
+        v,
+        optLayers.value,
+        optAntiDebug.checked,
+        optBlockClick.checked
+      );
+      output.value = enc;
+      updateOutputStats();
+      var ms = Math.round(performance.now() - t0);
+      setStatus('✓ Encrypted in ' + ms + 'ms', '#10b981');
+    }catch(e){
+      console.error(e);
+      output.value = '';
+      setStatus('Error: ' + e.message, '#e50914');
+      showToast('Encryption failed: ' + e.message, true);
+    }
   }
 
-  // Level selector
-  Array.prototype.slice.call(levelsBox.querySelectorAll('.level')).forEach(function(el){
-    el.addEventListener('click',function(){
-      Array.prototype.slice.call(levelsBox.querySelectorAll('.level')).forEach(function(x){x.classList.remove('active');});
-      el.classList.add('active');
-      currentLevel=parseInt(el.getAttribute('data-level'),10);
-      modeLabel.textContent=el.textContent.replace(/L\d/,'').trim();
-    });
+  function debouncedAutoEncrypt(){
+    clearTimeout(debounceTimer);
+    if(!optAuto.checked) return;
+    setStatus('Typing...', '#888');
+    debounceTimer = setTimeout(doEncrypt, 350);
+  }
+
+  // ============== Event wiring ==============
+  input.addEventListener('input', function(){
+    updateInputStats();
+    debouncedAutoEncrypt();
   });
 
-  document.getElementById('encryptBtn').addEventListener('click',function(){
-    var v=input.value.trim();
-    if(!v){ showToast('Pehle HTML code paste karo'); return; }
-    output.value=encrypt(v);
-    updateStats();
-    showToast('Encrypt ho gaya — Level '+currentLevel+'! COPY dabao');
+  input.addEventListener('paste', function(){
+    setTimeout(function(){
+      updateInputStats();
+      if(optAuto.checked){
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(doEncrypt, 50);
+      }
+    }, 10);
   });
 
-  document.getElementById('decryptBtn').addEventListener('click',function(){
-    var v=input.value.trim();
-    if(!v){ showToast('Pehle encrypted code paste karo'); return; }
-    var dec=decrypt(v);
-    if(dec===null){ showToast('Decrypt nahi hua — sirf L1/L2 supported'); return; }
-    output.value=dec;
-    updateStats();
-    showToast('Decrypt ho gaya');
+  optLayers.addEventListener('change', debouncedAutoEncrypt);
+  optAntiDebug.addEventListener('change', debouncedAutoEncrypt);
+  optBlockClick.addEventListener('change', debouncedAutoEncrypt);
+
+  document.getElementById('encryptBtn').addEventListener('click', function(){
+    doEncrypt();
+    if(output.value) showToast('🔐 Encrypted! ' + output.value.length.toLocaleString() + ' chars');
   });
 
-  document.getElementById('clearBtn').addEventListener('click',function(){
-    input.value='';output.value='';updateStats();showToast('Clear');
+  document.getElementById('copyBtn').addEventListener('click', function(){
+    if(!output.value){ showToast('Nothing to copy', true); return; }
+    output.select();
+    try{
+      document.execCommand('copy');
+      if(navigator.clipboard) navigator.clipboard.writeText(output.value).catch(function(){});
+      showToast('✓ Copied to clipboard!');
+    }catch(e){ showToast('Copy failed', true); }
+    output.setSelectionRange(0,0);
+    output.blur();
   });
 
-  document.getElementById('copyBtn').addEventListener('click',function(){
-    if(!output.value){ showToast('Output empty hai'); return; }
-    var tmp=document.createElement('textarea');
-    tmp.value=output.value;document.body.appendChild(tmp);tmp.select();
-    try{ document.execCommand('copy'); showToast('Copy ho gaya'); }
-    catch(e){ showToast('Copy failed'); }
-    document.body.removeChild(tmp);
+  document.getElementById('downloadBtn').addEventListener('click', function(){
+    if(!output.value){ showToast('Encrypt karo pehle', true); return; }
+    var blob = new Blob([output.value], {type:'text/html;charset=utf-8'});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'encrypted-' + Date.now() + '.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    showToast('⬇ Downloaded!');
   });
 
-  document.getElementById('downloadBtn').addEventListener('click',function(){
-    if(!output.value){ showToast('Pehle Encrypt karo'); return; }
-    var blob=new Blob([output.value],{type:'text/html'});
-    var url=URL.createObjectURL(blob);
-    var a=document.createElement('a');
-    a.href=url;a.download='encrypted.html';
-    document.body.appendChild(a);a.click();
-    document.body.removeChild(a);URL.revokeObjectURL(url);
-    showToast('Downloaded');
+  document.getElementById('previewBtn').addEventListener('click', function(){
+    if(!output.value){ showToast('Encrypt karo pehle', true); return; }
+    var blob = new Blob([output.value], {type:'text/html;charset=utf-8'});
+    var url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 30000);
+    showToast('Opened in new tab');
   });
 
-  input.addEventListener('input',updateStats);
+  document.getElementById('clearBtn').addEventListener('click', function(){
+    input.value = '';
+    output.value = '';
+    updateInputStats();
+    updateOutputStats();
+    setStatus('Cleared', '#888');
+    input.focus();
+  });
+
+  document.getElementById('sampleBtn').addEventListener('click', function(){
+    input.value = '<!DOCTYPE html>\n<html>\n<head>\n  <title>My Secret Page</title>\n  <style>\n    body { font-family: Arial; background: #0a0a0a; color: #fff; text-align: center; padding: 60px; }\n    h1 { color: #e50914; font-size: 48px; }\n  </style>\n</head>\n<body>\n  <h1>🔥 Hello from RAJAMODS7</h1>\n  <p>This page is encrypted!</p>\n  <button onclick="alert(\'It works!\')">Click Me</button>\n</body>\n</html>';
+    updateInputStats();
+    doEncrypt();
+    showToast('Sample loaded & encrypted');
+  });
+
+  // initial
+  updateInputStats();
+  updateOutputStats();
+  setStatus('Ready', '#10b981');
 })();
 </script>
 </body>
