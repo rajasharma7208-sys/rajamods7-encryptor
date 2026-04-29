@@ -173,27 +173,10 @@ footer b{color:#e50914}
     return wrapper;
   }
 
-  // ============== Core encryption: nested base64 + URI encoding ==============
-  function utf8ToBase64(str){
-    return btoa(unescape(encodeURIComponent(str)));
-  }
-
-  function escapeHex(str){
-    var out = '';
-    for(var i=0;i<str.length;i++){
-      var c = str.charCodeAt(i);
-      if(c < 128){
-        var h = c.toString(16).toUpperCase();
-        out += '%' + (h.length < 2 ? '0' : '') + h;
-      } else if(c < 256){
-        out += '%' + c.toString(16).toUpperCase();
-      } else {
-        // Multi-byte UTF-16
-        out += '%u' + ('0000' + c.toString(16).toUpperCase()).slice(-4);
-      }
-    }
-    return out;
-  }
+  // ============== Core encryption: escape() inner + nested base64 outer ==============
+  // escape() converts ALL non-alphanumeric to %XX (or %uXXXX for unicode),
+  // so the inner result is pure ASCII. Then outer layers can use plain btoa/atob
+  // without any UTF-8 or URI re-decoding (which would corrupt the %XX sequences).
 
   function encryptHTML(html, layers, antiDebug, blockClick){
     // Step 1: wrap with protection scaffold (if requested)
@@ -201,15 +184,17 @@ footer b{color:#e50914}
       ? buildProtectionWrapper(html, antiDebug, blockClick)
       : html;
 
-    // Step 2: innermost = unescape() based hex layer (matches send.vis.ee inner)
-    var hex = escapeHex(inner);
-    var current = '<!DOCTYPE html>\n<script type="text/javascript">document.write(unescape("' + hex + '"));</scr' + 'ipt>';
+    // Step 2: innermost = escape() + unescape() — pure ASCII output
+    // Use the global escape() which produces %XX and %uXXXX for non-ASCII
+    var escaped = escape(inner);
+    var current = '<!DOCTYPE html>\n<script type="text/javascript">document.write(unescape("' + escaped + '"));</scr' + 'ipt>';
 
-    // Step 3: outer N layers of base64 + decodeURIComponent + atob
+    // Step 3: outer N layers of plain base64 — atob alone restores prev layer exactly
     layers = Math.max(1, Math.min(6, parseInt(layers,10) || 3));
     for(var i=0; i<layers; i++){
-      var b64 = utf8ToBase64(current);
-      current = '<!DOCTYPE html>\n<script type="text/javascript">document.write(decodeURIComponent(atob("' + b64 + '")));</scr' + 'ipt>';
+      // current is pure ASCII at this point, so plain btoa is safe
+      var b64 = btoa(current);
+      current = '<!DOCTYPE html>\n<script type="text/javascript">document.write(atob("' + b64 + '"));</scr' + 'ipt>';
     }
     return current;
   }
