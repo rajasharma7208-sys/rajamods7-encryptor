@@ -92,11 +92,13 @@
       <div class="level" data-level="2"><span class="dot"></span><span class="num">L2</span> Medium</div>
       <div class="level active" data-level="3"><span class="dot"></span><span class="num">L3</span> Heavy</div>
       <div class="level" data-level="4"><span class="dot"></span><span class="num">L4</span> Ultra</div>
+      <div class="level" data-level="5"><span class="dot"></span><span class="num">L5</span> Nested Mega</div>
     </div>
 
     <div class="options">
       <label class="check"><input type="checkbox" id="optAntiDebug" checked /> Anti-DevTools (F12, right-click block)</label>
       <label class="check"><input type="checkbox" id="optMinify" checked /> Minify wrapper</label>
+      <label class="check" style="margin-left:auto">Nested Layers: <input type="number" id="optLayers" value="3" min="1" max="6" style="width:50px;background:#1f1f1f;color:#fff;border:1px solid #333;border-radius:4px;padding:4px 8px;margin-left:6px" /></label>
     </div>
   </header>
 
@@ -139,6 +141,7 @@
   var toast=document.getElementById('toast');
   var optAntiDebug=document.getElementById('optAntiDebug');
   var optMinify=document.getElementById('optMinify');
+  var optLayers=document.getElementById('optLayers');
   var levelsBox=document.getElementById('levels');
   var currentLevel=3;
   var toastTimer;
@@ -240,13 +243,54 @@
     return s;
   }
 
+  // Level 5 — Nested Mega: escape() inner + N base64+URI layers (matches "send.vis.ee style" pattern)
+  function encryptL5(html,withAntiDebug,layers){
+    var inner = html;
+    if(withAntiDebug){
+      // Wrap original HTML in an anti-protection scaffold (iframe + protection script)
+      var encInner = encodeURIComponent(inner).replace(/'/g,'%27');
+      var prot = '<!DOCTYPE html>\n<html>\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<title>Protected</title>\n<style>html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:transparent;}</style>\n</head>\n<body>\n<script>\n'+
+        "document.addEventListener('contextmenu',e=>e.preventDefault());"+
+        "document.addEventListener('selectstart',e=>e.preventDefault());"+
+        "document.addEventListener('dragstart',e=>e.preventDefault());"+
+        "document.body.style.userSelect='none';document.body.style.webkitUserSelect='none';"+
+        "document.addEventListener('keydown',function(e){var k=(e.key||'').toLowerCase();if(e.ctrlKey&&['u','s','p','i','j','c'].includes(k))e.preventDefault();if(e.keyCode===123)e.preventDefault();if(e.ctrlKey&&e.shiftKey&&['i','j','c'].includes(k))e.preventDefault();});"+
+        "(function(){setInterval(function(){var s=new Date();debugger;if(new Date()-s>100){document.body.innerHTML='<div style=\"font-family:sans-serif;text-align:center;padding:60px;color:#e50914\"><h1>Access Denied</h1></div>';}},1500);})();"+
+        "document.write(decodeURIComponent('"+encInner+"'));"+
+        '\n</script>\n</body>\n</html>';
+      inner = prot;
+    }
+    // Innermost layer: escape (URI-hex) + document.write(decodeURIComponent('...'))
+    var hex = '';
+    for(var i=0;i<inner.length;i++){
+      var c=inner.charCodeAt(i);
+      if(c<128){
+        var h=c.toString(16).toUpperCase();
+        hex += '%'+(h.length<2?'0':'')+h;
+      } else {
+        hex += encodeURIComponent(inner.charAt(i)).replace(/%/g,'%').toUpperCase();
+      }
+    }
+    var current = '<!DOCTYPE html>\n<script>document.write(decodeURIComponent(\''+hex+'\'))</script>';
+    // Outer layers: base64 + URI escape, wrap in document.write(decodeURIComponent(atob('...')))
+    var n = Math.max(1, Math.min(6, layers||3));
+    for(var L=0; L<n; L++){
+      var b64 = btoa(unescape(encodeURIComponent(current)));
+      // Re-encode to URI escape after base64 (matches the pattern: layer's atob output is the next layer string)
+      current = '<!DOCTYPE html>\n<script type="text/javascript">document.write(decodeURIComponent(atob(\''+b64+'\')))</script>';
+    }
+    return current;
+  }
+
   function encrypt(html){
     var ad=optAntiDebug.checked;
     var mn=optMinify.checked;
+    var lyr=parseInt(optLayers.value,10)||3;
     if(currentLevel===1) return encryptL1(html,ad);
     if(currentLevel===2) return encryptL2(html,ad,mn);
     if(currentLevel===3) return encryptL3(html,ad,mn);
     if(currentLevel===4) return encryptL4(html,ad,mn);
+    if(currentLevel===5) return encryptL5(html,ad,lyr);
     return encryptL3(html,ad,mn);
   }
 
