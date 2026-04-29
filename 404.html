@@ -21,8 +21,27 @@
   .tag{font-size:11px;color:#8a8a8a;letter-spacing:3px;text-transform:uppercase}
   h1{font-size:34px;margin-top:18px;font-weight:700;line-height:1.15}
   h1 span{color:#e50914}
-  p.lead{margin-top:10px;color:#aaa;font-size:15px;max-width:700px;line-height:1.55}
-  .grid{display:grid;grid-template-columns:1fr;gap:24px;margin-top:32px}
+  p.lead{margin-top:10px;color:#aaa;font-size:15px;max-width:720px;line-height:1.55}
+
+  .levels{display:flex;gap:8px;margin-top:22px;flex-wrap:wrap}
+  .level{
+    background:#141414;border:1px solid #232323;color:#aaa;padding:10px 18px;border-radius:8px;
+    cursor:pointer;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;
+    transition:all .2s;display:flex;align-items:center;gap:8px;
+  }
+  .level:hover{border-color:#444;color:#e5e5e5}
+  .level.active{background:rgba(229,9,20,.12);border-color:#e50914;color:#fff}
+  .level .dot{width:8px;height:8px;border-radius:50%;background:#444}
+  .level.active .dot{background:#e50914;box-shadow:0 0 8px #e50914}
+  .level .num{background:#1f1f1f;color:#888;padding:1px 7px;border-radius:4px;font-size:10px}
+  .level.active .num{background:#e50914;color:#fff}
+
+  .options{margin-top:18px;display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+  .check{display:flex;align-items:center;gap:8px;cursor:pointer;font-size:13px;color:#aaa;user-select:none}
+  .check input{accent-color:#e50914;width:16px;height:16px;cursor:pointer}
+  .check:hover{color:#e5e5e5}
+
+  .grid{display:grid;grid-template-columns:1fr;gap:24px;margin-top:28px}
   @media(min-width:900px){.grid{grid-template-columns:1fr 1fr}}
   .panel{background:#141414;border:1px solid #232323;border-radius:14px;padding:18px;display:flex;flex-direction:column}
   .panel h3{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
@@ -46,7 +65,7 @@
   .btn.secondary:hover{background:#2a2a2a;box-shadow:none}
   .btn.copy{background:#1f1f1f;color:#e50914;border:1px solid #2a2a2a;padding:6px 14px;font-size:11px;letter-spacing:1px}
   .btn.copy:hover{background:#2a2a2a;box-shadow:none;transform:none}
-  .stats{display:flex;gap:18px;margin-top:14px;font-size:12px;color:#777}
+  .stats{display:flex;gap:18px;margin-top:14px;font-size:12px;color:#777;flex-wrap:wrap}
   .stats span b{color:#e5e5e5;font-weight:600}
   footer{text-align:center;margin-top:50px;color:#555;font-size:12px;letter-spacing:1px}
   footer b{color:#e50914}
@@ -63,10 +82,22 @@
   <header>
     <div class="brand">
       <div class="logo">RAJAMODS7</div>
-      <div class="tag">HTML Encryptor Tool</div>
+      <div class="tag">HTML Encryptor — Pro</div>
     </div>
-    <h1>HTML <span>Encrypt</span> Karo Ek Click Me</h1>
-    <p class="lead">Apna HTML code paste karo, "Encrypt" dabao, encrypted output copy karo. Output ko kahin bhi paste karoge to browser me normally render hoga, lekin source code padhna mushkil hoga.</p>
+    <h1>HTML <span>Encrypt</span> Karo Strong Mode Me</h1>
+    <p class="lead">Apna HTML paste karo, level select karo, "Encrypt" dabao. Heavy mode me XOR + Base64 + obfuscated variables + anti-DevTools sab laga hua hai — easily decrypt nahi hota.</p>
+
+    <div class="levels" id="levels">
+      <div class="level" data-level="1"><span class="dot"></span><span class="num">L1</span> Light</div>
+      <div class="level" data-level="2"><span class="dot"></span><span class="num">L2</span> Medium</div>
+      <div class="level active" data-level="3"><span class="dot"></span><span class="num">L3</span> Heavy</div>
+      <div class="level" data-level="4"><span class="dot"></span><span class="num">L4</span> Ultra</div>
+    </div>
+
+    <div class="options">
+      <label class="check"><input type="checkbox" id="optAntiDebug" checked /> Anti-DevTools (F12, right-click block)</label>
+      <label class="check"><input type="checkbox" id="optMinify" checked /> Minify wrapper</label>
+    </div>
   </header>
 
   <div class="grid">
@@ -79,13 +110,13 @@
     <div class="panel">
       <h3>Encrypted Output <button class="btn copy" id="copyBtn" type="button">COPY</button></h3>
       <textarea id="output" placeholder="Encrypted code will appear here..." readonly></textarea>
-      <div class="stats"><span>Length: <b id="outLen">0</b></span><span>Compression: <b id="ratio">—</b></span></div>
+      <div class="stats"><span>Length: <b id="outLen">0</b></span><span>Ratio: <b id="ratio">—</b></span><span>Mode: <b id="modeLabel">Heavy</b></span></div>
     </div>
   </div>
 
   <div class="actions">
     <button class="btn" id="encryptBtn" type="button">Encrypt</button>
-    <button class="btn secondary" id="decryptBtn" type="button">Decrypt</button>
+    <button class="btn secondary" id="decryptBtn" type="button">Decrypt (L1/L2)</button>
     <button class="btn secondary" id="clearBtn" type="button">Clear</button>
     <button class="btn secondary" id="downloadBtn" type="button">Download .html</button>
   </div>
@@ -104,12 +135,16 @@
   var inLen=document.getElementById('inLen');
   var outLen=document.getElementById('outLen');
   var ratio=document.getElementById('ratio');
+  var modeLabel=document.getElementById('modeLabel');
   var toast=document.getElementById('toast');
+  var optAntiDebug=document.getElementById('optAntiDebug');
+  var optMinify=document.getElementById('optMinify');
+  var levelsBox=document.getElementById('levels');
+  var currentLevel=3;
   var toastTimer;
 
   function showToast(msg){
-    toast.textContent=msg;
-    toast.classList.add('show');
+    toast.textContent=msg;toast.classList.add('show');
     clearTimeout(toastTimer);
     toastTimer=setTimeout(function(){toast.classList.remove('show');},2200);
   }
@@ -120,43 +155,145 @@
     if(input.value.length>0 && output.value.length>0){
       var pct=Math.round((output.value.length/input.value.length)*100);
       ratio.textContent=pct+'%';
-    } else {
-      ratio.textContent='—';
+    } else { ratio.textContent='—'; }
+  }
+
+  function rndVar(){return '_0x'+Math.random().toString(16).slice(2,8);}
+  function rnd(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+
+  function utf8ToStr(s){return unescape(encodeURIComponent(s));}
+  function strToUtf8(s){return decodeURIComponent(escape(s));}
+
+  function antiDebugCode(){
+    return "document.addEventListener('contextmenu',function(e){e.preventDefault();});"+
+      "document.addEventListener('keydown',function(e){var k=e.keyCode||e.which;if(k==123||(e.ctrlKey&&e.shiftKey&&(k==73||k==74||k==67))||(e.ctrlKey&&k==85))e.preventDefault();});"+
+      "(function(){var t=function(){var s=new Date();debugger;if(new Date()-s>100){document.body.innerHTML='<div style=\"font-family:sans-serif;text-align:center;padding:60px;color:#e50914\"><h1>Access Denied</h1><p>DevTools detected. Reload to continue.</p></div>';}};setInterval(t,1500);})();";
+  }
+
+  // Level 1 — escape / unescape (basic)
+  function encryptL1(html,withAntiDebug){
+    var s='<noscript>You must enable javascript in your browser to view this webpage.</noscript>\n<!DOCTYPE html>\n<script type="text/javascript">document.write(unescape("'+escape(html)+'"));';
+    if(withAntiDebug) s+=antiDebugCode();
+    s+='</scr'+'ipt>';
+    return s;
+  }
+
+  // Level 2 — Base64 + eval
+  function encryptL2(html,withAntiDebug,minify){
+    var b64=btoa(utf8ToStr(html));
+    var v1=rndVar(),v2=rndVar();
+    var body='var '+v1+'="'+b64+'";var '+v2+'=decodeURIComponent(escape(atob('+v1+')));document.write('+v2+');';
+    if(withAntiDebug) body+=antiDebugCode();
+    var s='<noscript>You must enable javascript in your browser to view this webpage.</noscript>\n<!DOCTYPE html>\n<script type="text/javascript">'+(minify?'(function(){'+body+'})();':'\n(function(){\n'+body+'\n})();\n')+'</scr'+'ipt>';
+    return s;
+  }
+
+  // Level 3 — XOR + Base64 + obfuscated variables (Heavy)
+  function encryptL3(html,withAntiDebug,minify){
+    var keyLen=32;
+    var key=[];for(var i=0;i<keyLen;i++) key.push(rnd(0,255));
+    var raw=utf8ToStr(html);
+    var xored='';
+    for(var j=0;j<raw.length;j++){
+      xored+=String.fromCharCode(raw.charCodeAt(j)^key[j%keyLen]);
     }
+    var b64=btoa(xored);
+    var v1=rndVar(),v2=rndVar(),v3=rndVar(),v4=rndVar(),v5=rndVar();
+    var body='var '+v1+'=['+key.join(',')+'];'+
+      'var '+v2+'="'+b64+'";'+
+      'var '+v3+'=function(s,k){var r="";for(var i=0;i<s.length;i++)r+=String.fromCharCode(s.charCodeAt(i)^k[i%k.length]);return r;};'+
+      'var '+v4+'=atob('+v2+');'+
+      'var '+v5+'=decodeURIComponent(escape('+v3+'('+v4+','+v1+')));'+
+      'document.write('+v5+');';
+    if(withAntiDebug) body+=antiDebugCode();
+    var s='<noscript>You must enable javascript in your browser to view this webpage.</noscript>\n<!DOCTYPE html>\n<script type="text/javascript">'+(minify?'(function(){'+body+'})();':'\n(function(){\n'+body+'\n})();\n')+'</scr'+'ipt>';
+    return s;
   }
 
-  function encryptHtml(html){
-    var escaped=escape(html);
-    return '<noscript>You must enable javascript in your browser to view this webpage.</noscript>\n<!DOCTYPE html>\n<script type="text/javascript">document.write(unescape("'+escaped+'"));</scr'+'ipt>';
+  // Level 4 — XOR + Base64 + char-shift + double layer (Ultra)
+  function encryptL4(html,withAntiDebug,minify){
+    var shift=rnd(3,250);
+    var keyLen=48;
+    var key=[];for(var i=0;i<keyLen;i++) key.push(rnd(0,255));
+    var raw=utf8ToStr(html);
+    var xored='';
+    for(var j=0;j<raw.length;j++){
+      var c=(raw.charCodeAt(j)+shift)&0xff;
+      xored+=String.fromCharCode(c^key[j%keyLen]);
+    }
+    var b64=btoa(xored);
+    // Split base64 into chunks
+    var chunkSize=80;
+    var chunks=[];
+    for(var k=0;k<b64.length;k+=chunkSize) chunks.push('"'+b64.slice(k,k+chunkSize)+'"');
+    var v1=rndVar(),v2=rndVar(),v3=rndVar(),v4=rndVar(),v5=rndVar(),v6=rndVar(),v7=rndVar();
+    var body='var '+v1+'=['+key.join(',')+'];'+
+      'var '+v6+'='+shift+';'+
+      'var '+v2+'=['+chunks.join(',')+'].join("");'+
+      'var '+v3+'=function(s,k,sh){var r="";for(var i=0;i<s.length;i++){var c=s.charCodeAt(i)^k[i%k.length];c=(c-sh+256)&0xff;r+=String.fromCharCode(c);}return r;};'+
+      'var '+v7+'=function(b){return atob(b);};'+
+      'var '+v4+'='+v7+'('+v2+');'+
+      'var '+v5+'=decodeURIComponent(escape('+v3+'('+v4+','+v1+','+v6+')));'+
+      'document.write('+v5+');';
+    if(withAntiDebug) body+=antiDebugCode();
+    var s='<noscript>You must enable javascript in your browser to view this webpage.</noscript>\n<!DOCTYPE html>\n<script type="text/javascript">'+(minify?'(function(){'+body+'})();':'\n(function(){\n'+body+'\n})();\n')+'</scr'+'ipt>';
+    return s;
   }
 
-  function decryptHtml(enc){
+  function encrypt(html){
+    var ad=optAntiDebug.checked;
+    var mn=optMinify.checked;
+    if(currentLevel===1) return encryptL1(html,ad);
+    if(currentLevel===2) return encryptL2(html,ad,mn);
+    if(currentLevel===3) return encryptL3(html,ad,mn);
+    if(currentLevel===4) return encryptL4(html,ad,mn);
+    return encryptL3(html,ad,mn);
+  }
+
+  function decrypt(enc){
+    // Try L1 first
     var m=enc.match(/document\.write\(unescape\("([\s\S]*?)"\)\)/);
-    if(!m) return null;
-    try{ return unescape(m[1]); }catch(e){ return null; }
+    if(m){ try{ return unescape(m[1]); }catch(e){} }
+    // Try L2 (base64 + atob)
+    var m2=enc.match(/atob\(\s*"([A-Za-z0-9+/=]+)"\s*\)/);
+    if(!m2){
+      var m2b=enc.match(/var\s+(\w+)\s*=\s*"([A-Za-z0-9+/=]+)";\s*var\s+\w+\s*=\s*decodeURIComponent\(escape\(atob\(\1\)\)\)/);
+      if(m2b) m2=[null,m2b[2]];
+    }
+    if(m2){ try{ return decodeURIComponent(escape(atob(m2[1]))); }catch(e){} }
+    return null;
   }
+
+  // Level selector
+  Array.prototype.slice.call(levelsBox.querySelectorAll('.level')).forEach(function(el){
+    el.addEventListener('click',function(){
+      Array.prototype.slice.call(levelsBox.querySelectorAll('.level')).forEach(function(x){x.classList.remove('active');});
+      el.classList.add('active');
+      currentLevel=parseInt(el.getAttribute('data-level'),10);
+      modeLabel.textContent=el.textContent.replace(/L\d/,'').trim();
+    });
+  });
 
   document.getElementById('encryptBtn').addEventListener('click',function(){
     var v=input.value.trim();
     if(!v){ showToast('Pehle HTML code paste karo'); return; }
-    output.value=encryptHtml(v);
+    output.value=encrypt(v);
     updateStats();
-    showToast('Encrypt ho gaya! Ab COPY dabao');
+    showToast('Encrypt ho gaya — Level '+currentLevel+'! COPY dabao');
   });
 
   document.getElementById('decryptBtn').addEventListener('click',function(){
     var v=input.value.trim();
     if(!v){ showToast('Pehle encrypted code paste karo'); return; }
-    var dec=decryptHtml(v);
-    if(dec===null){ showToast('Invalid encrypted code'); return; }
+    var dec=decrypt(v);
+    if(dec===null){ showToast('Decrypt nahi hua — sirf L1/L2 supported'); return; }
     output.value=dec;
     updateStats();
     showToast('Decrypt ho gaya');
   });
 
   document.getElementById('clearBtn').addEventListener('click',function(){
-    input.value='';output.value='';updateStats();
-    showToast('Clear');
+    input.value='';output.value='';updateStats();showToast('Clear');
   });
 
   document.getElementById('copyBtn').addEventListener('click',function(){
@@ -180,7 +317,6 @@
   });
 
   input.addEventListener('input',updateStats);
-  output.addEventListener('input',updateStats);
 })();
 </script>
 </body>
